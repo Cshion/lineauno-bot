@@ -1,15 +1,20 @@
 "use strict";
 const request = require("request");
 const cheerio = require("cheerio");
-const async = require("async");
+const async   = require("async");
+const fs      = require("fs");
+const util    = require("util");
+const path    = require("path");
 
 const HORARIOS_URL = {
-    "semana":"http://www.lineauno.pe/horarios/lunes-viernes"
+    "semana"  : "http://www.lineauno.pe/horarios/lunes-viernes",
+    "sabados" : "http://www.lineauno.pe/horarios/sabados",
+    "domingos": "http://www.lineauno.pe/horarios/domingos-feriados"
 };
 
 let data = {};
 
-
+console.info("Empezando a sacar datos de horarios...");
 
 function crawlMain(urlMain,cb){
     let mainData = [];
@@ -55,15 +60,27 @@ function crawlEstacion(estacionUrl,cb){
         function(estacionHtml,next){
             let $ = cheerio.load(estacionHtml);
             let tables = $("table[class=h_table]>tbody");
-            let tableLlegada = tables.eq(0);
-            let tableSalida = tables.eq(1);
+            let tableLlegada = tables.eq(0).children("tr").children("td").children("span");
+            let tableSalida = tables.eq(1).children("tr").children("td").children("span");
+            
+            let horariosOut = {
+                "llegadas": [],
+                "salidas": []
+            };
 
             tableLlegada.each(function(i,elem){
                 let t = $(this);
-                console.log(t.html())
+                let horaLlegada = t.text().trim();
+                horariosOut["llegadas"].push(horaLlegada);
             });
 
-            return next();
+            tableSalida.each(function(i,elem){
+                let t = $(this);
+                let horaSalida = t.text().trim();
+                horariosOut["salidas"].push(horaSalida);
+            });
+
+            return next(null,horariosOut);
         }
     ],function(err,data){
         if(err){
@@ -73,35 +90,53 @@ function crawlEstacion(estacionUrl,cb){
     });
 }
 
-crawlEstacion("http://www.lineauno.pe/horarios/lunes-viernes/villa-el-salvador",function(err,data){
-    if(err){
-        console.error(err);
-    }else{
-        console.log(data);
-    }
-});
 
-let resultado = [];
-/*
-async.eachOf(HORARIOS_URL,function(horarioUrl,horarioFecha,next){
+let resultado = {
+    "semana" :[],
+    "sabados":[],
+    "domingos":[]
+};
+
+async.eachOfSeries(HORARIOS_URL,function(horarioUrl,horarioFecha,cb){
+    console.log("Extrayendo datos de fecha..",horarioFecha);
     async.waterfall([
         async.apply(crawlMain,horarioUrl),
         function(horarioData,next){
             async.each(
                 horarioData,
                 function(hD,done){
-                    crawlEstacion(hd["url"],function(err,estacionData){
-                        console.log(estacionData);
+                    console.log("Extrayendo datos de la estacion..",hD["nombre"]);
+                    crawlEstacion(hD["url"],function(err,estacionData){
+                        if(err){
+                            return done(err);
+                        }
+                        estacionData["nombre"]  = hD["nombre"]
+                        resultado[horarioFecha].push(estacionData);
                         done();
                     });
                 },
-                function(){
+                function(err){
+                    if(err){
+                        return next(err);
+                    }
                     return next();
                 });
         }
-    ]);
+    ],cb);
+},function(err){
+    if(err){
+        console.error(err);
+    }
+    
+    fs.writeFile(path.resolve(__dirname,"data.json"), JSON.stringify(resultado), 'utf-8',function(err){
+        if(err){
+            console.error(err);
+        }
+        console.log("Listo!, se debio haber creado el archivo data.json");
+    });
+    
 });
-*/
+
 
 
 
