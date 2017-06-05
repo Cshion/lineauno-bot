@@ -18,8 +18,11 @@
   "homepage": "https://github.com/Cshion/lineauno-slackbot#readme",
   "dependencies": {
     "async": "^2.4.1",
+    "body-parser": "^1.17.2",
     "cheerio": "^1.0.0-rc.1",
+    "express": "^4.15.3",
     "moment": "^2.18.1",
+    "moment-timezone": "^0.5.13",
     "request": "^2.81.0"
   }
 }
