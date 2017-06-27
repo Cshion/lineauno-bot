@@ -1,4 +1,4 @@
 .idea
 node_modules
-data.json
 scripts/data.json
+.env

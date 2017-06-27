@@ -1,40 +1,19 @@
 "use strict";
-const Operations = require("./operations");
-const app        = require("express")();
-const bodyParser = require("body-parser");
-const moment     = require('moment-timezone');
+const fs    = require("fs");
+const app   = require("./app");
+const http  = require("http");
+const debug = require("debug")("lineauno-bot:server");
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
+if(fs.existsSync(".env")){
+	require("dotenv").config();
+}
 
+let port = process.env.APP_PORT || 3000;
+let host = process.env.APP_HOST || "localhost";
+let server = http.createServer(app);
 
-app.post("/",function(req,res){
-  let text       = req.body["text"];
-  
-  if(!text){
-    return res.send("");
-  }
+server.listen(port,host);
 
-  let date = moment().tz("America/Lima").format("HH:mm"); 
-  let llegada = Operations.obtenerProximaLlegada(text,"semana",date);
-  let salida  = Operations.obtenerProximaSalida(text,"semana",date);
-
-  if(!llegada || !salida){
-    return res.send("");
-  }
-
-  let text_result = "Proxima llegada: " + llegada +"\n"+ "Proxima salida: "+salida ;
-
-  let result     = {
-    color:"good",
-    text:text_result,
-    mrkdwn_in:["text"],
-    response_type: "in_channel",
-  }
-
-  return res.json(result)
-});
-
-app.listen(5001,function(){
-  console.log("Bot corriendo en 3000");
+server.on("listening",function(){
+	debug("Servidor escuchando en "+host+":"+port);
 });
