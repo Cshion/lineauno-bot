@@ -15,8 +15,16 @@ Puedes obtener los proximos horarios de una estacion del metro de Lima, Linea Un
 
 # Configuracion
 
-- APP_PORT = 3000
-- APP_HOST = localhost
+Configurar las siguientes variables en un archivo .env en la raiz del proyecto, como ejemplo puede tomar el archivo .env.example
+
+* Aplicacion
+    - APP_PORT = 3000
+    - APP_HOST = localhost
+    
+* Slack
+    - Crear nueva aplicacion
+    - Configurar slash command, con la URL del servidor
+    - Habilitar interactive messages
 
 # Ejecucion
 * npm start
