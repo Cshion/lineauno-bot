@@ -8,7 +8,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true }));
 
 
-app.post("/slack" , slackController);
+app.post("/slack" , slackController.showMenu);
+app.post("/slack_menu",slackController.sendResponse);
 app.post("/fbmessenger" , messengerController);
 
 module.exports = app;
