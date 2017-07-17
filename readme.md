@@ -4,7 +4,7 @@ Puedes obtener los proximos horarios de una estacion del metro de Lima, Linea Un
 
 # Slack
 
-![](http://gph.is/2tvtU20)
+![](https://media.giphy.com/media/13ntPEg7GKf08E/giphy.gif)
 
 # Requisitos
 
